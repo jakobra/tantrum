@@ -19,3 +19,6 @@ doc/
 
 .vagrant
 .DS_Store
+public/assets
+config/app_config.yml
+config/client_config.yml
