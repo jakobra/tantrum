@@ -16,11 +16,10 @@ module Tantrum
   
     get '/assets/:client/*' do |client, path|
       content = StorageService.get(client, path)
-      StorageCache.save(client, path, content)
+      StorageCache.save(client, path, content[:content])
       
-      mime_type = MIME::Types.type_for(path)
-      content_type mime_type.first.content_type
-      content
+      content_type content[:content_type]
+      content[:content]
     end
   end
 end
