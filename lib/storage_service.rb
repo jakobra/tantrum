@@ -1,20 +1,20 @@
 AWS.config(:access_key_id => APP_CONFIG["aws"]["access_key_id"],
   :secret_access_key => APP_CONFIG["aws"]["secret_access_key"])
 
-require 'json'
-
 module Tantrum
   class StorageService
-    def self.save(client, content, extension)
+    def self.save(client, content, filename)
       s3 =  AWS::S3.new
-    
+      
       bucket = s3.buckets[client]
       unless(bucket.exists?)
         bucket = s3.buckets.create(client)
       end
+      
+      extension = File.extname(filename)
       key = SecureRandom.uuid
       content_key = key + "#{extension}"
-      info = create_info(content, content_key, extension)
+      info = create_info(filename)
       
       content_obj = bucket.objects[content_key]
       content_obj.write(content)
@@ -33,9 +33,9 @@ module Tantrum
       [obj.read, content_type]
     end
     
-    def self.create_info(content, content_key, extension)
-      mime_type = MIME::Types.type_for(content_key)
-      info = {extension: extension, content_type: get_content_type(content_key) }
+    def self.create_info(filename)
+      mime_type = MIME::Types.type_for(filename)
+      info = {original_filename: filename, content_type: get_content_type(filename) }
     end
     
     def self.get_content_type(content_key)
