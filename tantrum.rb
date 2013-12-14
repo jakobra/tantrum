@@ -5,6 +5,11 @@ module Tantrum
     configure :production, :development do
       enable :logging
     end
+    
+    def initialize(app = nil)
+      super(app)
+      @image_service = ImageService.new
+    end
   
     get '/' do
       erb :index
@@ -14,12 +19,14 @@ module Tantrum
       StorageService.save(params['client'], params['file'][:tempfile].read, File.extname(params['file'][:filename]))
     end
   
-    get '/assets/:client/*' do |client, path|
-      content = StorageService.get(client, path)
-      StorageCache.save(client, path, content[:content])
+    get '/assets/:client/*$*.*' do |client, resource_key, template, extension|
+      content, c_type = StorageService.get(client, resource_key + "." + extension)
       
-      content_type content[:content_type]
-      content[:content]
+      manipulated = @image_service.manipulate(client, content, template)
+      StorageCache.save(client, "#{resource_key}$#{template}.#{extension}", manipulated)
+      
+      content_type c_type
+      manipulated
     end
   end
 end

@@ -30,7 +30,7 @@ module Tantrum
       bucket = s3.buckets[client]
       obj = bucket.objects[content_key]
       content_type = get_content_type(content_key)
-      { content: obj.read, content_type: content_type }
+      [obj.read, content_type]
     end
     
     def self.create_info(content, content_key, extension)

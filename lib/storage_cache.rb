@@ -3,7 +3,7 @@ require 'fileutils'
 module Tantrum
   class StorageCache
     def self.save(client, path, content)
-      unless APP_CONFIG["cache_enabled"]
+      unless APP_CONFIG["cache_enabled"] == "true"
         return
       end
       
