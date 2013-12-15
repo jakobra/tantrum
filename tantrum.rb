@@ -23,7 +23,7 @@ module Tantrum
       
       content_key = StorageService.save(payload["client"], Base64.strict_decode64(payload["content"]), payload["filename"])
       content_type "application/json"
-      {status: "OK", content_key: content_key}
+      {status: "OK", content_key: content_key}.to_json
     end
   
     get '/assets/:client/:key.:extension' do |client, key, extension|
