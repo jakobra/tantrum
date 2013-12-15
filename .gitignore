@@ -22,3 +22,5 @@ doc/
 public/assets
 config/app_config.yml
 config/client_config.yml
+config/deploy.rb
+config/deploy/staging.rb
