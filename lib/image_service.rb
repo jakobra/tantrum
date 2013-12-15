@@ -1,12 +1,7 @@
 module Tantrum
-  class ImageService
-    
-    def initialize
-      @clients_config = YAML.load_file(File.dirname(__FILE__) + "/../config/client_config.yml")["clients"]
-    end
-    
-    def manipulate(client, image_content, template)
-      client_config = @clients_config[client]
+  class ImageService    
+    def self.manipulate(client, image_content, template)
+      client_config = ClientService.get_config(client)
       
       raise ArgumentError, 'Invalid template' unless client_config["templates"].include?(template)
       
@@ -26,21 +21,22 @@ module Tantrum
       end
     end
     
-    def resize_and_pad(width, height, image_content)
+    private
+    
+    def self.resize_and_pad(width, height, image_content)
       image = MiniMagick::Image.read(image_content)
       image.resize_and_pad(width, height, background = :transparent, gravity = 'Center')
       image.to_blob
     end
     
-    def resize_and_crop(width, height, image_content)
+    def self.resize_and_crop(width, height, image_content)
       image = MiniMagick::Image.read(image_content)
       image.resize "#{width}x#{height}^"
       image.crop("#{width}x#{height}+0+0")
-      #image.resize_and_pad(width, height, background = :transparent, gravity = 'Center')
       image.to_blob
     end
     
-    def resize(width, height, image_content)
+    def self.resize(width, height, image_content)
       image = MiniMagick::Image.read(image_content)
       image.resize "#{width}x#{height}>"
       image.to_blob

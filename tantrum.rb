@@ -6,12 +6,6 @@ module Tantrum
     configure :production, :development do
       enable :logging
     end
-    
-    def initialize(app = nil)
-      super(app)
-      @image_service = ImageService.new
-      @client_service = ClientService.new
-    end
   
     get '/' do
       erb :index
@@ -27,21 +21,17 @@ module Tantrum
       payload = JSON.parse(request.body.read)
       check_client(payload['client'])
       
-      cool = StorageService.save(payload["client"], Base64.strict_decode64(payload["content"]), payload["filename"])
-      logger.info cool
+      content_key = StorageService.save(payload["client"], Base64.strict_decode64(payload["content"]), payload["filename"])
+      content_type "application/json"
+      {status: "OK", content_key: content_key}
     end
   
     get '/assets/:client/:key.:extension' do |client, key, extension|
       check_client(client)
-      resource_key = key.split("$")[0]
-      template = key.split("$")[1]
-      logger.info "resource_key => #{resource_key}"
-      logger.info "template => #{template}"
-      logger.info "extension => #{extension}"
-      
+      resource_key, template = key.split("$")
       content, c_type = StorageService.get(client, resource_key + "." + extension)
       
-      content = @image_service.manipulate(client, content, template) unless template == nil || template.empty?
+      content = ImageService.manipulate(client, content, template) unless template == nil || template.empty?
       StorageCache.save(client, "#{key}.#{extension}", content)
       
       content_type c_type
@@ -49,7 +39,7 @@ module Tantrum
     end
     
     def check_client(client)
-      raise "Invalid client" unless @client_service.client_exists?(client)
+      raise "Invalid client" unless ClientService.client_exists?(client)
     end
   end
 end

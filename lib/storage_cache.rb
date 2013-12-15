@@ -3,9 +3,7 @@ require 'fileutils'
 module Tantrum
   class StorageCache
     def self.save(client, path, content)
-      unless APP_CONFIG["cache_enabled"] == "true"
-        return
-      end
+      return unless APP_CONFIG["cache_enabled"] == "true"
       
       local_path = File.dirname(__FILE__) + "/../public/assets/#{client}/#{path}"
       dir = File.dirname(local_path)

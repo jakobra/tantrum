@@ -3,13 +3,10 @@ AWS.config(:access_key_id => APP_CONFIG["aws"]["access_key_id"],
 
 module Tantrum
   class StorageService
+    @@s3 =  AWS::S3.new
+    
     def self.save(client, content, filename)
-      s3 =  AWS::S3.new
-      
-      bucket = s3.buckets[client]
-      unless(bucket.exists?)
-        bucket = s3.buckets.create(client)
-      end
+      bucket = @@s3.buckets[client]
       
       extension = File.extname(filename)
       key = SecureRandom.uuid
@@ -26,12 +23,13 @@ module Tantrum
     end
     
     def self.get(client, content_key)
-      s3 = AWS::S3.new
-      bucket = s3.buckets[client]
+      bucket = @@s3.buckets[client]
       obj = bucket.objects[content_key]
       content_type = get_content_type(content_key)
       [obj.read, content_type]
     end
+    
+    private
     
     def self.create_info(filename)
       mime_type = MIME::Types.type_for(filename)
