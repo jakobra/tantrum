@@ -29,13 +29,16 @@ module Tantrum
     get '/assets/:client/:key.:extension' do |client, key, extension|
       check_client(client)
       resource_key, template = key.split("$")
-      content, c_type = StorageService.get(client, resource_key + "." + extension)
-      
-      content = ImageService.manipulate(client, content, template) unless template == nil || template.empty?
-      StorageCache.save(client, "#{key}.#{extension}", content)
+      content, c_type, e_tag, mod_at = StorageService.get(client, resource_key, extension)
       config = ClientService.get_config(client)
       
       cache_control :public, :must_revalidate, :max_age => config["cache_max_age"]
+      etag e_tag
+      last_modified mod_at
+      
+      content = ImageService.manipulate(client, content, template) unless template == nil || template.empty?
+      StorageCache.save(client, "#{key}.#{extension}", content)
+      
       content_type c_type
       content
     end
