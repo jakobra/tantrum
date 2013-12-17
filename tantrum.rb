@@ -33,7 +33,9 @@ module Tantrum
       
       content = ImageService.manipulate(client, content, template) unless template == nil || template.empty?
       StorageCache.save(client, "#{key}.#{extension}", content)
+      config = ClientService.get_config(client)
       
+      cache_control :public, :must_revalidate, :max_age => config["cache_max_age"]
       content_type c_type
       content
     end

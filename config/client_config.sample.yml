@@ -1,5 +1,6 @@
 clients:
   client:
+    cache_max_age: 900
     templates:
       image_gallery_template:
         width: 100
