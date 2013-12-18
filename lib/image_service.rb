@@ -31,8 +31,14 @@ module Tantrum
     
     def self.resize_and_crop(width, height, image_content)
       image = MiniMagick::Image.read(image_content)
-      image.resize "#{width}x#{height}^"
-      image.crop("#{width}x#{height}+0+0")
+      image.resize_and_pad(width, height, background = :transparent, gravity = 'Center')
+      if image[:width] > width
+        x_start = (image[:width] - width) / 2
+        image.crop("#{width}x#{height}+#{x_start}+0")
+      else
+        y_start = (image[:height] - height) / 2
+        image.crop("#{width}x#{height}+0+#{y_start}")
+      end
       image.to_blob
     end
     
