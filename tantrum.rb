@@ -45,6 +45,10 @@ module Tantrum
       content
     end
     
+    get '/clear_client/:client' do |client|
+      StorageService.clear_client(client)
+    end
+    
     def check_client(client)
       raise "Invalid client" unless ClientService.client_exists?(client)
     end

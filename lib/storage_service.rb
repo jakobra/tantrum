@@ -44,6 +44,11 @@ module Tantrum
       [content.read, content_type]
     end
     
+    def self.clear_client(client)
+      bucket = @@s3.buckets[client]
+      bucket.delete!
+    end
+    
     private
     
     def self.create_info(filename)
