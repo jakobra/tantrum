@@ -44,12 +44,26 @@ module Tantrum
       [content.read, content_type]
     end
     
+    def self.delete(client, resource_key, extension)
+      bucket = @@s3.buckets[client]
+      
+      delete_obj(bucket, resource_key + "." + extension)
+      
+      delete_obj(bucket, resource_key + ".info")
+    end
+    
     def self.clear_client(client)
       bucket = @@s3.buckets[client]
       bucket.delete!
     end
     
     private
+    
+    def self.delete_obj(bucket, key)
+      content = bucket.objects[key]
+      content.head
+      content.delete
+    end
     
     def self.create_info(filename)
       mime_type = MIME::Types.type_for(filename)

@@ -10,11 +10,6 @@ module Tantrum
     get '/' do
       erb :index
     end
-  
-    post '/save' do
-      check_client(params['client'])
-      StorageService.save(params['client'], params['content'][:tempfile].read, params['content'][:filename])
-    end
     
     post '/upload' do
       request.body.rewind
@@ -29,7 +24,12 @@ module Tantrum
     get '/assets/:client/:key.:extension' do |client, key, extension|
       check_client(client)
       resource_key, template = key.split("$")
-      e_tag, mod_at = StorageService.get_metadata(client, resource_key, template)
+      begin
+        e_tag, mod_at = StorageService.get_metadata(client, resource_key, template)
+      rescue AWS::S3::Errors::NoSuchKey => e
+        halt 404
+      end
+      
       
       config = ClientService.get_config(client)
       cache_control :public, :must_revalidate, :max_age => config["cache_max_age"]
@@ -45,7 +45,19 @@ module Tantrum
       content
     end
     
+    delete '/assets/:client/:key.:extension' do |client, key, extension|
+      check_client(client)
+      begin
+        StorageService.delete(client, key, extension)
+      rescue AWS::S3::Errors::NoSuchKey => e
+        halt 404
+      end
+      
+      status 204
+    end
+    
     get '/clear_client/:client' do |client|
+      check_client(client)
       StorageService.clear_client(client)
     end
     
