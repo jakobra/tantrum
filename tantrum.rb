@@ -22,6 +22,14 @@ module Tantrum
     end
   
     get '/assets/:client/:key.:extension' do |client, key, extension|
+      get_content(client, key, extension)
+    end
+
+    get '/assets/:client/:key/:filename.:extension' do |client, key, filename, extension|
+      get_content(client, key, extension)
+    end
+
+    def get_content(client, key, extension)
       check_client(client)
       resource_key, template = key.split("$")
       begin
@@ -29,7 +37,6 @@ module Tantrum
       rescue AWS::S3::Errors::NoSuchKey => e
         halt 404
       end
-      
       
       config = ClientService.get_config(client)
       cache_control :public, :must_revalidate, :max_age => config["cache_max_age"]
