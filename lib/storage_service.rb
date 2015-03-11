@@ -8,48 +8,50 @@ module Tantrum
     @@s3 =  AWS::S3.new
     
     def self.save(client, content, filename)
-      bucket = @@s3.buckets[client]
+      bucket = get_bucket(client)
       
       extension = File.extname(filename)
       key = SecureRandom.uuid
-      content_key = key + "#{extension}"
       info = create_info(filename)
-      
+
+      content_key = create_key(client, key, extension)
+
       content_obj = bucket.objects[content_key]
       content_obj.write(content)
-      
-      info_key = key + ".info"
+
+      info_key = create_key(client, key, ".info")
       info_obj = bucket.objects[info_key]
       info_obj.write(info.to_json)
       content_key
     end
     
     def self.get_metadata(client, resource_key, template)
-      bucket = @@s3.buckets[client]
+      bucket = get_bucket(client)
       
-      info = bucket.objects[resource_key + ".info"]
-      mod_at = get_modified_at(info)
+      info_key = create_key(client, resource_key, ".info")
+      info_obj = bucket.objects[info_key]
+      mod_at = get_modified_at(info_obj)
       e_tag = get_entity_tag(resource_key, mod_at, client, template)
       
       [e_tag, mod_at]
     end
     
     def self.get(client, resource_key, extension)
-      bucket = @@s3.buckets[client]
+      bucket = get_bucket(client)
       
-      content_key = resource_key + "." + extension
-      content = bucket.objects[content_key]
+      content_key = create_key(client, resource_key, extension)
+      content_obj = bucket.objects[content_key]
       content_type = get_content_type(content_key)
       
-      [content.read, content_type]
+      [content_obj.read, content_type]
     end
     
     def self.delete(client, resource_key, extension)
-      bucket = @@s3.buckets[client]
+      bucket = get_bucket(client)
       
-      delete_obj(bucket, resource_key + "." + extension)
+      delete_obj(bucket, create_key(client, resource_key, extension))
       
-      delete_obj(bucket, resource_key + ".info")
+      delete_obj(bucket, create_key(client, resource_key, ".info"))
     end
     
     def self.clear_client(client)
@@ -58,6 +60,23 @@ module Tantrum
     end
     
     private
+
+    def self.create_key(client, resource_key, extension)
+      client_config = ClientService.get_config(client)
+      key = nil
+      if extension.start_with?(".")
+        key = resource_key + extension
+      else
+        key = resource_key + "." + extension
+      end
+      key = client_config["path"] + "/" + key unless client_config["path"] == nil
+      key
+    end
+
+    def self.get_bucket(client)
+      client_config = ClientService.get_config(client)
+      @@s3.buckets[client_config["bucket"]]
+    end
     
     def self.delete_obj(bucket, key)
       content = bucket.objects[key]
