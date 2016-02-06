@@ -14,22 +14,23 @@ module Tantrum
       key = SecureRandom.uuid
       info = create_info(filename)
 
-      content_key = create_key(client, key, extension)
+      content_path = create_resource_path(client, key, extension)
 
-      content_obj = bucket.objects[content_key]
+      content_obj = bucket.objects[content_path]
       content_obj.write(content)
 
-      info_key = create_key(client, key, ".info")
-      info_obj = bucket.objects[info_key]
+      info_path = create_resource_path(client, key, ".info")
+      info_obj = bucket.objects[info_path]
       info_obj.write(info.to_json)
-      content_key
+
+      create_key(key, extension)
     end
     
     def self.get_metadata(client, resource_key, template)
       bucket = get_bucket(client)
       
-      info_key = create_key(client, resource_key, ".info")
-      info_obj = bucket.objects[info_key]
+      info_path = create_resource_path(client, resource_key, ".info")
+      info_obj = bucket.objects[info_path]
       mod_at = get_modified_at(info_obj)
       e_tag = get_entity_tag(resource_key, mod_at, client, template)
       
@@ -39,8 +40,8 @@ module Tantrum
     def self.get(client, resource_key, extension)
       bucket = get_bucket(client)
       
-      content_key = create_key(client, resource_key, extension)
-      content_obj = bucket.objects[content_key]
+      content_path = create_resource_path(client, resource_key, extension)
+      content_obj = bucket.objects[content_path]
       content_type = get_content_type(content_key)
       
       [content_obj.read, content_type]
@@ -49,9 +50,9 @@ module Tantrum
     def self.delete(client, resource_key, extension)
       bucket = get_bucket(client)
       
-      delete_obj(bucket, create_key(client, resource_key, extension))
+      delete_obj(bucket, create_resource_path(client, resource_key, extension))
       
-      delete_obj(bucket, create_key(client, resource_key, ".info"))
+      delete_obj(bucket, create_resource_path(client, resource_key, ".info"))
     end
     
     def self.clear_client(client)
@@ -61,7 +62,7 @@ module Tantrum
     
     private
 
-    def self.create_key(client, resource_key, extension)
+    def self.create_resource_path(client, resource_key, extension)
       client_config = ClientService.get_config(client)
       key = nil
       if extension.start_with?(".")
@@ -70,6 +71,16 @@ module Tantrum
         key = resource_key + "." + extension
       end
       key = client_config["path"] + "/" + key unless client_config["path"] == nil
+      key
+    end
+
+    def self.create_key(resource_key, extension)
+      key = nil
+      if extension.start_with?(".")
+        key = resource_key + extension
+      else
+        key = resource_key + "." + extension
+      end
       key
     end
 
