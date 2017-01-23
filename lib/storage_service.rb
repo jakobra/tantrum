@@ -55,11 +55,6 @@ module Tantrum
       delete_obj(bucket, create_resource_path(client, resource_key, ".info"))
     end
     
-    def self.clear_client(client)
-      bucket = @@s3.buckets[client]
-      bucket.delete!
-    end
-    
     private
 
     def self.create_resource_path(client, resource_key, extension)

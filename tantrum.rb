@@ -63,11 +63,6 @@ module Tantrum
       status 204
     end
     
-    get '/clear_client/:client' do |client|
-      check_client(client)
-      StorageService.clear_client(client)
-    end
-    
     def check_client(client)
       raise "Invalid client" unless ClientService.client_exists?(client)
     end
