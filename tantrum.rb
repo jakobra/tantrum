@@ -20,6 +20,16 @@ module Tantrum
       content_type "application/json"
       {status: "OK", content_key: content_key}.to_json
     end
+
+    post '/assets/:client' do |client|
+      check_client(payload['client'])
+      request.body.rewind
+      payload = JSON.parse(request.body.read)
+      
+      content_key = StorageService.save(client, Base64.strict_decode64(payload["content"]), payload["filename"])
+      content_type "application/json"
+      {status: "OK", content_key: content_key}.to_json
+    end
   
     get '/assets/:client/:key.:extension' do |client, key, extension|
       get_content(client, key, extension)
@@ -61,6 +71,16 @@ module Tantrum
       end
       
       status 204
+    end
+
+    put '/assets/:client/:key.:extension' do |client, key, extension|
+    	check_client(client)
+
+    	request.body.rewind
+      payload = JSON.parse(request.body.read)
+      
+      content_key = StorageService.update(client, Base64.strict_decode64(payload["content"]), payload["filename"], key, extension)
+      {status: "OK"}
     end
     
     def check_client(client)

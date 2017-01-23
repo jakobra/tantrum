@@ -54,6 +54,27 @@ module Tantrum
       
       delete_obj(bucket, create_resource_path(client, resource_key, ".info"))
     end
+
+    def self.update(client, content, filename, resource_key, extension)
+      bucket = get_bucket(client)
+      
+      new_extension = File.extname(filename)
+      new_content_type = get_content_type(filename)
+      
+      info_path = create_resource_path(client, resource_key, ".info")
+      info_obj = bucket.objects[info_path]
+      info = JSON.parse(info_obj.read)
+
+      raise "Invalid content_type" unless info["content_type"] == new_content_type
+
+      content_path = create_resource_path(client, resource_key, extension)
+      content_obj = bucket.objects[content_path]
+      content_obj.write(content)
+      
+      info["modified_at"] = Time.now.utc
+      info["original_filename"] = filename
+      info_obj.write(info.to_json)
+    end
     
     private
 
@@ -91,7 +112,6 @@ module Tantrum
     end
     
     def self.create_info(filename)
-      mime_type = MIME::Types.type_for(filename)
       info = {original_filename: filename, content_type: get_content_type(filename), created_at: Time.now.utc, modified_at: Time.now.utc }
     end
     
