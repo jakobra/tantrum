@@ -1,24 +1,16 @@
 source 'http://rubygems.org'
 
-gem "sinatra", "~> 1.4.4"
+gem "sinatra", "~> 2.0.0"
 
-gem "aws-sdk", "~> 1.29.1"
+gem "aws-sdk", "~> 3.0.1"
 
-gem "mime-types", "~> 2.0"
+gem "mime-types", "~> 3.1"
 
-gem "mini_magick", "~> 3.7.0"
-
-group :development do
-  gem "capistrano", "~> 3.0.1"
-  gem 'capistrano-bundler', "~> 1.0.0"
-  gem 'capistrano-rbenv', github: "capistrano/rbenv"
-end
+gem "mini_magick", "~> 4.8.0"
 
 group :test do
-  gem "rspec", "~> 2.14.1"
-  gem "rspec-mocks", "~> 2.14.4"
+  gem "rspec", "~> 3.7.0"
+  gem "rspec-mocks", "~> 3.7.0"
 end
 
-group :production, :staging do
-  gem "passenger", "~> 4.0.29"
-end
+gem "thin", "~> 1.7.2"
