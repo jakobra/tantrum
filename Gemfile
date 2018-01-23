@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 gem "sinatra", "~> 2.0.0"
 
-gem "aws-sdk", "~> 3.0.1"
+gem 'aws-sdk-s3', '~> 1.8'
 
 gem "mime-types", "~> 3.1"
 

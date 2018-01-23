@@ -2,7 +2,9 @@ FROM ruby:2.5.0-slim-stretch
 
 RUN apt-get update && apt-get install -y \
   build-essential \
-  libgmp-dev
+  libgmp-dev \
+  imagemagick \
+  libmagickwand-dev
 
 
 RUN mkdir -p /app

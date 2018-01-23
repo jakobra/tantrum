@@ -1,5 +1,6 @@
 require 'sinatra/base'
-require "base64"
+require 'base64'
+require 'logger'
 
 module Tantrum
   class Application < Sinatra::Base
@@ -44,7 +45,7 @@ module Tantrum
       resource_key, template = key.split("$")
       begin
         e_tag, mod_at = StorageService.get_metadata(client, resource_key, template)
-      rescue AWS::S3::Errors::NoSuchKey => e
+      rescue Aws::S3::Errors::NoSuchKey => e
         halt 404
       end
 
@@ -66,21 +67,11 @@ module Tantrum
       check_client(client)
       begin
         StorageService.delete(client, key, extension)
-      rescue AWS::S3::Errors::NoSuchKey => e
+      rescue Aws::S3::Errors::NoSuchKey => e
         halt 404
       end
 
       status 204
-    end
-
-    put '/assets/:client/:key.:extension' do |client, key, extension|
-    	check_client(client)
-
-    	request.body.rewind
-      payload = JSON.parse(request.body.read)
-
-      content_key = StorageService.update(client, Base64.strict_decode64(payload["content"]), payload["filename"], key, extension)
-      {status: "OK"}
     end
 
     def check_client(client)
