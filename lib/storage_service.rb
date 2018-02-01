@@ -1,5 +1,5 @@
 Aws.config.update({
-  region: 'eu-west-1',
+  region: 'us-east-1',
   credentials: Aws::Credentials.new(APP_CONFIG["aws"]["access_key_id"], APP_CONFIG["aws"]["secret_access_key"])
 })
 
@@ -8,7 +8,6 @@ require 'digest/sha1'
 
 module Tantrum
   class StorageService
-    @@s3 = Aws::S3::Resource.new
 
     def self.save(client, content, filename)
       bucket = get_bucket(client)
@@ -84,7 +83,9 @@ module Tantrum
 
     def self.get_bucket(client)
       client_config = ClientService.get_config(client)
-      @@s3.bucket(client_config["bucket"])
+      Aws.config.update({ region: client_config["region"] })
+      resource = Aws::S3::Resource.new
+      resource.bucket(client_config["bucket"])
     end
 
     def self.delete_obj(bucket, key)

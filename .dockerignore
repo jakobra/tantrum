@@ -1,4 +1,5 @@
-config/app_config.sample.yml
-config/client_config.sample.yml
+config/*.yml
 Dockerfile
 README.md
+tmp/
+deploy/

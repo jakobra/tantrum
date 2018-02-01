@@ -17,4 +17,4 @@ COPY . ./
 
 EXPOSE 3300
 
-CMD ["ruby", "tantrum.rb"]
+CMD ["bundle", "exec", "rackup", "-p", "3300", "--host", "0.0.0.0"]

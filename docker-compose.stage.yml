@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  web:
+    container_name: tantrum_stage
+    volumes:
+      - ./config/client_config.yml:/app/config/client_config.yml
+      - ./config/app_config.yml:/app/config/app_config.yml
+    restart: always
+    
+networks:
+  default:
+    external:
+      name: slingshot_stage

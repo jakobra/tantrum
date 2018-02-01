@@ -1,6 +1,8 @@
 clients:
   client:
     cache_max_age: 900
+    bucket: "bucketname"
+    region: "eu-west-1"
     templates:
       image_gallery_template:
         width: 100
